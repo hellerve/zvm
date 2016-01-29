@@ -22,18 +22,17 @@
     (("d") (make-registers (get-a state) (get-b state) (get-c state) val))
     (else state)))
 
-(define (args-length op)
-  (case op
-      (("noop") 0)
-      (("add") 2)
-      (("sub") 2)
-      (("mul") 2)
-      (("div") 2)
-      (("print") 1)
-      (("and") 2)
-      (("or") 2)
-      (("not") 1)
-      (else 0)))
+(define args-length
+  (make-hash
+      "noop" 0
+      "add" 2
+      "sub" 2
+      "mul" 2
+      "div" 2
+      "print" 1
+      "and" 2
+      "or" 2
+      "not" 1))
 
 (define (compile-line line)
   (define (check-args arg)
