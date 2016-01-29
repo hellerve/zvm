@@ -1,0 +1,3 @@
+(load "vm")
+
+(compile-and-run (read-contents (car zepto:args)))
