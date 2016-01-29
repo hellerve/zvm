@@ -1,0 +1,114 @@
+(define-record-type registers
+  (make-registers a b c d)
+  registers?
+  (a get-a set-a)
+  (b get-b set-b)
+  (c get-c set-c)
+  (d get-d set-d))
+
+(define (get-reg state reg)
+  (case reg
+    (("a") (get-a state))
+    (("b") (get-b state))
+    (("c") (get-c state))
+    (("d") (get-d state))
+    (else reg)))
+
+(define (set-reg state reg val)
+  (case reg
+    (("a") (make-registers val (get-b state) (get-c state) (get-d state)))
+    (("b") (make-registers (get-a state) val (get-c state) (get-d state)))
+    (("c") (make-registers (get-a state) (get-b state) val (get-d state)))
+    (("d") (make-registers (get-a state) (get-b state) (get-c state) val))
+    (else state)))
+
+(define (args-length op)
+  (case op
+      (("noop") 0)
+      (("add") 2)
+      (("sub") 2)
+      (("mul") 2)
+      (("div") 2)
+      (("print") 1)
+      (("and") 2)
+      (("or") 2)
+      (("not") 1)
+      (else 0)))
+
+(define (compile-line line)
+  (define (check-args arg)
+    (cond
+      ((in? ["a" "b" "c" "d"] arg) arg)
+      ((number? (string->number arg)) (string->number arg))
+      (else (list arg "not a valid register"))))
+  (if (or (string:empty? line) (all? (curry eq? #\space) (string->list line)))
+    '()
+    (let* ((split (string:split line #\space))
+           (op (car split))
+           (tmp (map check-args (cdr split)))
+           (args (let ((len (args-length op)))
+             (if (/= len (length tmp))
+               (list op (++ "takes " (->string len) " arguments, " (->string (length tmp)) " given"))
+             tmp))))
+      (case op
+        (("noop") (list 0))
+        (("add") (list 1 args))
+        (("sub") (list 2 args))
+        (("mul") (list 3 args))
+        (("div") (list 4 args))
+        (("print") (list 5 args))
+        (("and") (list 6 args))
+        (("or") (list 7 args))
+        (("not") (list 8 args))
+        (else (list -1 (list (list op "not a valid operation"))))))))
+
+(define (compile-program src)
+  (filter (lambda (x) (not (null? x))) (map compile-line (string:split src #\newline))))
+
+(define (exec code regs)
+  (let* ((args (if (> (length code) 1) (cadr code) '()))
+         (to (or (null? args) (car args)))
+         (args (map (curry get-reg regs) args)))
+    (case (car code)
+      ((0) regs)
+      ((1) (set-reg regs to (apply + args)))
+      ((2) (set-reg regs to (apply - args)))
+      ((3) (set-reg regs to (apply * args)))
+      ((4) (set-reg regs to (apply / args)))
+      ((5) (begin
+        (map (lambda (x) (begin (display x) (display " "))) args)
+        (write "")
+        regs))
+      ((6) (set-reg regs to (apply bitwise-and args)))
+      ((7) (set-reg regs to (apply bitwise-or args)))
+      ((8) (set-reg regs to (apply bitwise-not args)))
+      (else (begin
+        (write (++ "invalid command code: " (->string (car code))))
+        regs)))))
+
+(define (run codes regs)
+  (let ((exec (reduce (lambda (acc x) (exec x acc)) regs codes)))
+    (get-a exec)))
+
+(define (check? compiled)
+  (not (any? (lambda (x) (if (> (length x) 1) (list? (caadr x)) #f)) compiled)))
+
+(define (post-mortem compiled src)
+  (let ((lst (string:split src #\newline)))
+    (begin
+      (indexed-map
+        (lambda (x i) 
+          (if (> (length x) 1)
+            (map 
+              (lambda (x)
+                (if (list? x)
+                  (error "in line" (add1 i) ": " (string:join x #\space) "in" (list:ref lst i))))
+              (cadr x))))
+        compiled)
+      (nil))))
+
+(define (compile-and-run src)
+  (let ((compiled (compile-program src)))
+    (if (check? compiled)
+      (run compiled (make-registers 0 0 0 0))
+      (post-mortem compiled src))))
