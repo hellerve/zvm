@@ -1,4 +1,4 @@
-(load "vm")
+(load "zvm/vm")
 
 (if (or (null? zepto:args) (not (eq? 1 (length zepto:args))))
   (write "usage: zvm <some-file>")

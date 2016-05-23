@@ -13,6 +13,7 @@ The result of all the opcodes are saved in the first register
 specified.
 The opcodes that are understood are 
 - noop: does nothing
+- set: sets a register
 - add: adds two registers
 - sub: substracts two registers
 - mul: multiplies two registers

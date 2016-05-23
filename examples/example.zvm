@@ -1,6 +1,7 @@
 add b a
 sub a b
 noop
+print a
 div a 1
 mul c d
 add a 1

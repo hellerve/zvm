@@ -24,6 +24,7 @@
 
 (define args-length
   (make-hash
+      "set" 2
       "noop" 0
       "add" 2
       "sub" 2
@@ -59,6 +60,7 @@
         (("and") (list 6 args))
         (("or") (list 7 args))
         (("not") (list 8 args))
+        (("set") (list 9 args))
         (else (list -1 (list (list op "not a valid operation"))))))))
 
 (define (compile-program src)
@@ -81,6 +83,7 @@
       ((6) (set-reg regs to (apply bitwise-and args)))
       ((7) (set-reg regs to (apply bitwise-or args)))
       ((8) (set-reg regs to (apply bitwise-not args)))
+      ((9) (set-reg regs to (cadr args)))
       (else (begin
         (write (++ "invalid command code: " (->string (car code))))
         regs)))))
