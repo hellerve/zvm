@@ -1,3 +1,5 @@
 (load "vm")
 
-(compile-and-run (read-contents (car zepto:args)))
+(if (or (null? zepto:args) (not (eq? 1 (length zepto:args))))
+  (write "usage: zvm <some-file>")
+  (compile-and-run (read-contents (car zepto:args))))

@@ -1,0 +1,16 @@
+#{:name "zvm" 
+  :version "1.0.0" 
+  :license "GPLv2" 
+  :tests []
+  :type :tool
+  :entry-point "vm-cli.zp"
+  :author #{:name "Veit Heller" 
+            :email "veit@veitheller.de" 
+            :github "@hellerve"}
+  :location #{:github "hellerve/zvm" 
+              :zpr "zvm"}
+  :zepto #{:version :any
+           :ez #f
+           :bz #f}
+  :dependencies ()
+  :dev-dependencies ()}
